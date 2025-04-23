@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   try {
     const payload = await request.json();
-    const { name, email, phone } = payload; // Remove userId from destructuring
+    const { name, email, phone } = payload;
 
     if (!name || !email) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         name,
         email,
         phone,
-        createdById: session.user.id, // Use session ID instead of payload
+        createdById: session.user.id,
       },
     });
 

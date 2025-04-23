@@ -92,7 +92,7 @@ export default function CreateCustomerForm({
               onChange={handleChange}
               required
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-              placeholder="John Doe"
+              
               disabled={loading}
             />
           </div>
@@ -109,7 +109,7 @@ export default function CreateCustomerForm({
               onChange={handleChange}
               required
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-              placeholder="john@example.com"
+              
               disabled={loading}
             />
           </div>
@@ -125,7 +125,7 @@ export default function CreateCustomerForm({
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-              placeholder="+1 (555) 000-0000"
+              
               pattern="[+]?[0-9\s\-]+"
               disabled={loading}
             />

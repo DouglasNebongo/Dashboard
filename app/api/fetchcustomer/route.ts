@@ -24,7 +24,6 @@ export async function GET() {
         createdAt: true,
       },
     });
-    console.log('Customers:', customers);
     return NextResponse.json(customers);
   } catch (error) {
     console.error('Error fetching customers:', error);
