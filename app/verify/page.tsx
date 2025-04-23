@@ -1,9 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
 export default function VerifyPage() {
+  return (
+    <div className="max-w-md mx-auto mt-10">
+      <h1 className="text-2xl font-bold mb-4">Verify Your Email</h1>
+      <Suspense fallback={<div>Loading verification details...</div>}>
+        <VerifyForm />
+      </Suspense>
+    </div>
+  );
+}
+
+function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
@@ -32,8 +43,7 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">Verify Your Email</h1>
+    <>
       <p className="mb-4">We've sent a 6-digit code to {email}</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,6 +63,6 @@ export default function VerifyPage() {
           {isSubmitting ? 'Verifying...' : 'Verify Code'}
         </button>
       </form>
-    </div>
+    </>
   );
 }

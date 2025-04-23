@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "@/app/lib/email";
-import { signUpSchema } from "@/app/lib/schemas";
+import { SignUpSchema } from "@/app/lib/schemas";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const validatedFields = signUpSchema.safeParse(body);
+  const validatedFields = SignUpSchema.safeParse(body);
 
   if (!validatedFields.success) {
     return NextResponse.json(

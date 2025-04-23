@@ -1,7 +1,7 @@
 // app/api/customer/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 

@@ -1,6 +1,6 @@
 import { formatCurrency } from '@/app/lib/utils';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
 const ITEMS_PER_PAGE = 6;
 

@@ -13,8 +13,6 @@ const transport = createTransport({
   });
 
 export async function sendVerificationEmail(email: string, code: string) {
-  // const token = await generateVerificationCode(email);
-  // const url = `${process.env.NEXTAUTH_URL}/api/verify-email?token=${token}`;
 
   await transport.sendMail({
     from: process.env.EMAIL_FROM,

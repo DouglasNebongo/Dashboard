@@ -32,12 +32,7 @@ export async function POST(request: Request) {
   const requestId = headers.get('X-Request-ID');
   const nonce = headers.get('X-Nonce') || _nonce;
 
-  // if(!requestId || !nonce){
-  //   return NextResponse.json(
-  //     { error: 'Missing security headers' },
-  //     { status: 400 }
-  //   );
-  // }
+  
   console.log(`Signup attempt from IP: ${request.headers.get('x-forwarded-for')}`);
   console.log(`Attempting registration for: ${email}`);
   try {

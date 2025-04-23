@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
 import { CustomerPageClient } from '@/app/ui/customer-page';
 
@@ -39,7 +39,10 @@ export default async function CustomersPage() {
     return (
       <CustomerPageClient
         initialData={{
-          data: customers,
+          data: customers.map(customer => ({
+            ...customer,
+            phone: customer.phone ?? undefined,
+          })),
           pagination: {
             page: 1,
             pageSize,
