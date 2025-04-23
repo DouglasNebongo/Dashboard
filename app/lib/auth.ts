@@ -54,6 +54,7 @@ export async function generateVerificationCode(email: string) {
 }
 
 export async function validateVerificationCode(email: string, code: string) {
+  
   const validCode = await prisma.verificationCode.findFirst({
     where: {
       email,
@@ -62,13 +63,14 @@ export async function validateVerificationCode(email: string, code: string) {
       used: false,
     },
   });
-
+  
+  
   if (!validCode) return false;
 
   // Mark code as used
-  await prisma.verificationCode.update({
+  await prisma.verificationCode.delete({
     where: { id: validCode.id },
-    data: { used: true },
+   
   });
 
   // Mark email as verified

@@ -87,7 +87,45 @@ function SignInForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* ... rest of your form elements remain the same ... */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-white">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            {...register("email")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            aria-invalid={!!errors.email}
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-white">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            {...register("password")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            aria-invalid={!!errors.password}
+          />
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-400 text-white py-2 px-4 rounded-2xl hover:bg-blue-500 transition-colors disabled:opacity-50"
+        >
+          {isSubmitting ? "Signing In..." : "Sign In"}
+        </button>
       </form>
 
       <div className="flex items-center justify-center my-4">

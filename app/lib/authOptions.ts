@@ -46,10 +46,9 @@ const authorizeCredentials = async (credentials?: Record<string, string>) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) return null;
-
   if (code) {
     const isValidCode = await validateVerificationCode(email, code);
-    if (!isValidCode || !user.emailVerified) return null;
+    if (!isValidCode) return null;
     return user;
   }
 
