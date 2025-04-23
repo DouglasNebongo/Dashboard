@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-
+const currencies = ['USD', 'EUR', 'GBP', 'XAF', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'RUB'];
 
 
 import { updateInvoice } from '@/app/lib/actions';
@@ -19,8 +19,8 @@ export default function EditInvoiceForm({
   invoice,
   customers,
 }: {
-  invoice: InvoiceForm;
-  customers: CustomerField[];
+  invoice: any;
+  customers: any[];
 }) {
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
   return(
@@ -36,7 +36,7 @@ export default function EditInvoiceForm({
           id="customer"
           name="customerId"
           className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-          defaultValue={invoice.customer_id}
+          defaultValue={invoice.customerId}
         >
           <option value="" disabled>
             Select a customer
@@ -52,25 +52,47 @@ export default function EditInvoiceForm({
     </div>
 
     {/* Invoice Amount */}
-    <div className="mb-4">
-      <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-        Choose an amount
-      </label>
-      <div className="relative mt-2 rounded-md">
-        <div className="relative">
-          <input
-            id="amount"
-            name="amount"
-            type="number"
-            step="0.01"
-            defaultValue={invoice.amount}
-            placeholder="Enter USD amount"
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-          />
-          <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+    <div className="grid grid-cols-4 gap-4">
+      
+      <div>
+              <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
+                  Currency:
+              </label>
+              <select
+                  id="currency"
+                  name="currency"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  >
+                  <option value="">Select currency</option>
+                  {currencies.map((currency) => (
+                      <option key={currency} value={currency}>
+                          {currency}
+                      </option>
+                  ))}
+              </select>
+              </div>
+
+
+      {/* Invoice Amount */}
+      <div className="col-span-3 mb-4">
+        <label htmlFor="amount" className="mb-2 block text-sm font-medium">
+          Enter an amount
+        </label>
+        <div className="relative mt-2 rounded-md">
+          <div className="relative">
+            <input
+              id="amount"
+              name="amount"
+              type="number"
+              step="0.01"
+              placeholder="Enter amount"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              aria-describedby="amount-error"
+            />
+          </div>
         </div>
       </div>
-    </div>
+      </div>
 
     {/* Invoice Status */}
     <fieldset>

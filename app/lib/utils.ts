@@ -8,17 +8,19 @@ export const formatCurrency = (amount: number) => {
 };
 
 export const formatDateToLocal = (
-  dateStr: string,
+  dateInput: string | Date,
   locale: string = 'en-US',
 ) => {
-  const date = new Date(dateStr);
+  // Handle both string and Date inputs
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
+  
+  return new Intl.DateTimeFormat(locale, options).format(date);
 };
 
 export const generateYAxis = (revenue: Revenue[]) => {
