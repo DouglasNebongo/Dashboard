@@ -42,6 +42,13 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest
+      - name: Decrypt SSH Key
+        run: |
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > /tmp/id_rsa
+            chmod 600 /tmp/id_rsa
+            eval "$(ssh-agent -s)"
+            ssh-add /tmp/id_rsa <<< "${{ secrets.SSH_PASSPHRASE }}"
+        shell: bash
 
       - name: SSH to Droplet & Deploy
         uses: appleboy/ssh-action@v1
