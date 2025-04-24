@@ -49,8 +49,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # optional: set strict host key checking off if you trust your droplet
-          # key_scanner: true
+
           script: |
             set -euo pipefail
 
@@ -76,7 +75,7 @@ jobs:
             NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
             EOF
 
-            echo "Stopping old container (if any)…"
+            echo "Stopping old container …"
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
 
