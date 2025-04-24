@@ -26,7 +26,7 @@ jobs:
           tags: ${{ env.IMAGE_NAME }}:latest
 
       - name: SSH to Droplet & Deploy
-        uses: appleboy/ssh-action@v2
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
