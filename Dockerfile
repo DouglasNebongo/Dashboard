@@ -67,6 +67,17 @@ ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
 RUN ls -l /app/app/worker
 RUN npx ts-node --project app/worker/tsconfig.worker.json
+
+# --- DEBUG STEP: List contents after worker compilation ---
+# List contents of where we EXPECTED the output (relative to tsconfig)
+RUN ls -l /app/app/worker/
+# List contents of the supposed output directory
+RUN ls -l /app/app/worker/dist
+# List contents of the main /app directory (just in case 'dist' was created at root)
+RUN ls -l /app/
+# List contents of /app/dist (in case outDir was relative to WORKDIR)
+RUN ls -l /app/dist
+# --- End DEBUG STEP ---
 RUN npm run build
 
 FROM node:22-alpine3.18 AS runner
