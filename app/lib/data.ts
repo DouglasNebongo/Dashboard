@@ -2,6 +2,7 @@ import { formatCurrency } from '@/app/lib/utils';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
+import { Revenue } from './definitions'; 
 
 export interface FormattedInvoice {
   id: number;
@@ -255,7 +256,7 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
 }
 
 
-export async function fetchRevenue() {
+export async function fetchRevenue(): Promise<Revenue[]> {
   const createdById = await getAuthenticatedUserId();
   try {
     const transactions = await prisma.customerInvoice.findMany({
@@ -290,10 +291,8 @@ export async function fetchRevenue() {
       {} as Record<string, number>
     );
 
-    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-      month,
-      revenue
-    }));
+    return Object.entries(monthlyRevenue).map(
+      ([month, revenue]): Revenue => ({ month, revenue }) );
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch revenue data');
