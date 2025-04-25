@@ -36,6 +36,7 @@ RUN npm ci
 # Generate the Prisma client into node_modules/
 RUN npx prisma generate
 
+RUN ls -l /app
 # Copy source and build the Next.js app
 COPY . .
 
@@ -60,7 +61,7 @@ ENV UPSTASH_REDIS_PORT=$UPSTASH_REDIS_PORT
 ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
-
+RUN ls -l /app/worker
 RUN npx tsc --project worker/tsconfig.worker.json
 RUN npm run build
 
