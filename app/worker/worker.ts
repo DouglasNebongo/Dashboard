@@ -5,10 +5,10 @@ import { Redis } from '@upstash/redis';
 let redis: Redis | undefined;
 
 if (process.env.SKIP_REDIS_CONNECTION !== 'true') {
-const redis = new Redis({
+  redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
-}) } else {
+}); } else {
   
     console.log("Skipping Redis client initialization during build..");
    
