@@ -68,7 +68,6 @@ jobs:
             POSTGRES_USER=postgres
             POSTGRES_DB=myprismadb
             DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
@@ -84,7 +83,7 @@ jobs:
             UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
             UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
             NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
-            POSTGRES_URL=${{ secrets.POSTGRES_URL }}
+            POSTGRES_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
             EOF
 
             echo "Stopping old container (if any)…"
