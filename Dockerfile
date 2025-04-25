@@ -40,6 +40,10 @@ RUN ls -l /app
 # Copy source and build the Next.js app
 COPY . .
 
+RUN ls -l /app
+
+RUN ls -l /app/app
+
 ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 ENV UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL 
@@ -61,7 +65,7 @@ ENV UPSTASH_REDIS_PORT=$UPSTASH_REDIS_PORT
 ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
-RUN ls -l /app/worker
+RUN ls -l /app/app/worker
 RUN npx tsc --project app/worker/tsconfig.worker.json
 RUN npm run build
 
