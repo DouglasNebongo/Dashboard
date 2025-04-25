@@ -54,10 +54,20 @@ export async function POST(request: Request) {
       );
     }
     await createUser(fullName, email, password);
-   // add email task to the queue
     await addToQueue(email);
-    const redirectUrl = new URL('/verify', request.url);
-    redirectUrl.searchParams.set('email', email);
+
+
+    if (!process.env.NEXTAUTH_URL) {
+      console.error("NEXTAUTH_URL environment variable is not set!");
+      return NextResponse.json(
+          { error: 'Server configuration error: Redirect URL missing.' },
+          { status: 500 }
+            );
+      }
+      const redirectUrl = new URL('/verify', process.env.NEXTAUTH_URL);
+      redirectUrl.searchParams.set('email', email);
+      console.log(`Generated redirect URL: ${redirectUrl.toString()}`);
+
     return NextResponse.json(
       { redirectUrl: redirectUrl.toString() },
       { status: 200 }
