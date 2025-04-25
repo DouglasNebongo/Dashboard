@@ -127,7 +127,41 @@ jobs:
             echo "Waiting for database service to be healthy..."
             # Wait for the db service to reach the 'healthy' state before proceeding
             # This command requires docker compose version 1.27.0+ or docker compose plugin
-            docker compose wait db
+            
+              # --- MANUAL WAIT LOOP FOR DB HEALTH ---
+            echo "Waiting for database service to be healthy using manual check..."
+            HEALTH_CHECK_TIMEOUT=120 # Total time to wait in seconds (e.g., 2 minutes)
+            WAIT_INTERVAL=5 # How often to check the status in seconds
+            ELAPSED_TIME=0
+            DB_STATUS=""
+
+            while [ "$DB_STATUS" != "healthy" ] && [ $ELAPSED_TIME -lt $HEALTH_CHECK_TIMEOUT ]; do
+              # Get the service state (healthy, starting, running, exited, etc.)
+              # Redirect stderr to /dev/null in case the service isn't listed initially
+              DB_STATUS=$(docker compose ps db --format "{{.State}}" 2>/dev/null || echo "not_running")
+
+              if [ "$DB_STATUS" = "healthy" ]; then
+                echo "Database service is healthy."
+                break # Exit the loop
+              elif [ "$DB_STATUS" = "running" ] || [ "$DB_STATUS" = "starting" ]; then
+                echo "Database service is still starting or running (${DB_STATUS}). Waiting ${WAIT_INTERVAL}s..."
+              elif [ "$DB_STATUS" = "not_running" ] || [ "$DB_STATUS" = "exited" ]; then
+                 echo "Database service is not running or exited (${DB_STATUS}). Aborting."
+                 exit 1 # Exit script with error
+              else
+                echo "Unknown database service state: ${DB_STATUS}. Waiting ${WAIT_INTERVAL}s..."
+              fi
+
+              sleep $WAIT_INTERVAL
+              ELAPSED_TIME=$((ELAPSED_TIME + WAIT_INTERVAL))
+            done
+
+            # Check if the loop finished because of a timeout
+            if [ "$DB_STATUS" != "healthy" ]; then
+              echo "Database service did not become healthy within ${HEALTH_CHECK_TIMEOUT} seconds. Aborting."
+              exit 1 # Exit script with error
+            fi
+            # --- END MANUAL WAIT LOOP ---
 
             echo "Running Prisma migrations..."
             # Execute the migrate deploy command inside the running app container
