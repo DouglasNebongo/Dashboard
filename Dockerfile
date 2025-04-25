@@ -31,6 +31,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma
 ENV NODE_ENV=production
+
+RUN npm cache clean --force
 RUN npm install
 RUN ls -lR /app/node_modules/@types/
 
