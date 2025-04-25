@@ -34,6 +34,8 @@ ENV NODE_ENV=production
 
 RUN npm cache clean --force
 RUN npm install
+RUN npm install --save-dev --force @types/bcrypt @types/nodemailer
+
 RUN ls -laR /app/node_modules/@types/
 
 # Generate the Prisma client into node_modules/
