@@ -1,5 +1,5 @@
 # 1) Builder stage
-FROM node:20-alpine3.18 AS builder
+FROM node:22-alpine3.18 AS builder
 
 # Set working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # 2) Runner stage
-FROM node:20-alpine3.18 AS runner
+FROM node:22-alpine3.18 AS runner
 
 # Create app directory
 WORKDIR /app

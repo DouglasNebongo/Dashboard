@@ -175,90 +175,7 @@ export async function fetchCardData() {
   }
 }
 
-export async function fetchLatestInvoices() {
-  const createdById = await getAuthenticatedUserId();
-  try {
-    const latestInvoices = await prisma.customerInvoice.findMany({
-      where: {
-        userId: createdById,
-      },
-      select: {
-        id: true,
-        amount: true,
-        dateCreated: true,
-        customer: {
-          select: {
-            name: true,
-            imageUrl: true,
-            email: true,
-          }
-        }
-      },
-      orderBy: {
-        dateCreated: 'desc',
-      },
-      take: 5,
-    });
 
-    return latestInvoices.map((invoice: {
-      id: number;
-      amount: number;
-      customer: {
-        name: string;
-        email: string;
-        imageUrl: string | null;
-      };
-    }) => ({
-      id: invoice.id,
-      amount: formatCurrency(invoice.amount),
-      name: invoice.customer.name,
-      email: invoice.customer.email,
-      imageUrl: invoice.customer.imageUrl,
-    }));
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch latest invoices');
-  }
-}
-
-export async function fetchRevenue() {
-  const createdById = await getAuthenticatedUserId();
-  try {
-    const transactions = await prisma.customerInvoice.findMany({
-      where: {
-        userId: createdById,
-        status: 'paid',
-      },
-      select: {
-        amount: true,
-        dateCreated: true,
-      },
-      orderBy: {
-        dateCreated: 'asc',
-      }
-    });
-
-    const monthlyRevenue = transactions.reduce(
-      (acc: Record<string, number>, { dateCreated, amount }) => {
-        const monthYear = dateCreated.toLocaleString('default', { 
-          month: 'short', 
-          year: 'numeric' 
-        });
-        acc[monthYear] = (acc[monthYear] || 0) + amount;
-        return acc;
-      }, 
-      {} as Record<string, number>
-    );
-
-    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-      month,
-      revenue
-    }));
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data');
-  }
-}
 
 // Fetch filtered invoices 
 export async function fetchFilteredInvoices(query: string, currentPage: number) {
@@ -307,5 +224,101 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');
+  }
+}
+
+
+export async function fetchRevenue() {
+  const createdById = await getAuthenticatedUserId();
+  try {
+    const transactions = await prisma.customerInvoice.findMany({
+      where: {
+        userId: createdById,
+        status: 'paid',
+      },
+      select: {
+        amount: true,
+        dateCreated: true,
+      },
+      orderBy: {
+        dateCreated: 'asc',
+      }
+    });
+
+    // Add explicit type for transactions
+    type TransactionType = {
+      dateCreated: Date;
+      amount: number;
+    };
+
+    const monthlyRevenue = transactions.reduce(
+      (acc: Record<string, number>, transaction: TransactionType) => {
+        const monthYear = transaction.dateCreated.toLocaleString('default', { 
+          month: 'short', 
+          year: 'numeric' 
+        });
+        acc[monthYear] = (acc[monthYear] || 0) + transaction.amount;
+        return acc;
+      }, 
+      {} as Record<string, number>
+    );
+
+    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+      month,
+      revenue
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue data');
+  }
+}
+
+// Fetch latest invoices with explicit typing
+export async function fetchLatestInvoices() {
+  const createdById = await getAuthenticatedUserId();
+  try {
+    const latestInvoices = await prisma.customerInvoice.findMany({
+      where: {
+        userId: createdById,
+      },
+      select: {
+        id: true,
+        amount: true,
+        dateCreated: true,
+        customer: {
+          select: {
+            name: true,
+            imageUrl: true,
+            email: true,
+          }
+        }
+      },
+      orderBy: {
+        dateCreated: 'desc',
+      },
+      take: 5,
+    });
+
+    // Add explicit invoice type
+    type InvoiceType = {
+      id: number;
+      amount: number;
+      customer: {
+        name: string;
+        email: string;
+        imageUrl: string | null;
+      };
+    };
+
+    return latestInvoices.map((invoice: InvoiceType) => ({
+      id: invoice.id,
+      amount: formatCurrency(invoice.amount),
+      name: invoice.customer.name,
+      email: invoice.customer.email,
+      imageUrl: invoice.customer.imageUrl as string, // Type assertion
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch latest invoices');
   }
 }
