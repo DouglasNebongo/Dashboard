@@ -62,7 +62,7 @@ ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
 RUN ls -l /app/worker
-RUN npx tsc --project worker/tsconfig.worker.json
+RUN npx tsc --project app/worker/tsconfig.worker.json
 RUN npm run build
 
 FROM node:22-alpine3.18 AS runner
@@ -78,8 +78,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/dist ./dist
-
+COPY --from=builder /app/app/worker/dist ./dist
 # Expose your app port
 EXPOSE 3000
 
