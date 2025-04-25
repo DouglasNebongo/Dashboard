@@ -34,7 +34,7 @@ ENV NODE_ENV=production
 
 RUN npm cache clean --force
 RUN npm install
-RUN ls -lR /app/node_modules/@types/
+RUN ls -laR /app/node_modules/@types/
 
 # Generate the Prisma client into node_modules/
 RUN npx prisma generate
