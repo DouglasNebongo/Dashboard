@@ -212,7 +212,17 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
       take: ITEMS_PER_PAGE,
     });
 
-    return invoices.map(invoice => ({
+    return invoices.map((invoice: {
+      id: number;
+      amount: number;
+      dateCreated: Date;
+      status: 'paid' | 'pending';
+      customer: {
+        name: string;
+        email: string;
+        imageUrl: string | null;
+      };
+    }) => ({
       id: invoice.id,
       amount: invoice.amount,
       date: invoice.dateCreated,
