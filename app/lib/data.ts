@@ -290,9 +290,8 @@ export async function fetchRevenue(): Promise<Revenue[]> {
       }, 
       {} as Record<string, number>
     );
-
-    return Object.entries(monthlyRevenue).map(
-      ([month, revenue]): Revenue => ({ month, revenue }) );
+    const entries = Object.entries(monthlyRevenue) as [string, number][];
+    return entries.map(([month, revenue]) => ({ month, revenue }));
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch revenue data');
