@@ -4,7 +4,7 @@
       "module": "commonjs", // Use CommonJS for Node.js compatibility
       "moduleResolution": "node", // Use Node.js module resolution
       "noEmit": false, // Allow emitting JavaScript files
-      "outDir": "dist",
+      "outDir": "./dist",
      
     },
     "include": [
