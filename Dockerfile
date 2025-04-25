@@ -13,15 +13,16 @@ RUN npm ci
 # Generate the Prisma client into node_modules/
 RUN npx prisma generate
 # Copy source and build the Next.js app
-ARG GOOGLE_CLIENT_ID
-ARG GOOGLE_CLIENT_SECRET
-# 3) Expose them as real ENV vars for next build
-ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
 
 
 COPY . .
-RUN npm run build
+# RUN npm run build
+
+RUN --mount=type=secret,id=env \
+    set -a && \
+    . /run/secrets/env && \
+    set +a && \
+    npm run build
 
 # 2) Runner stage
 FROM node:22-alpine3.18 AS runner
