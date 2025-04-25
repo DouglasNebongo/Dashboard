@@ -127,7 +127,7 @@ jobs:
             echo "Waiting for database service to be healthy..."
             # Wait for the db service to reach the 'healthy' state before proceeding
             # This command requires docker compose version 1.27.0+ or docker compose plugin
-            docker compose wait db --timeout 60 # Wait up to 60 seconds
+            docker compose wait db
 
             echo "Running Prisma migrations..."
             # Execute the migrate deploy command inside the running app container
