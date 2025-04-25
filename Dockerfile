@@ -66,7 +66,7 @@ ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
 RUN ls -l /app/app/worker
-RUN npx ts-node --project app/worker/tsconfig.worker.json
+RUN npx tsc --project app/worker/tsconfig.worker.json
 
 # --- DEBUG STEP: List contents after worker compilation ---
 # List contents of where we EXPECTED the output (relative to tsconfig)
