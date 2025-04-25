@@ -5,7 +5,11 @@ import redisClient from '@/app/lib/redis';
 
 export async function POST(request: Request) {
   const { amount, currency } = await request.json();
-
+  
+  if(!redisClient){
+    console.log('redis not yet configured');
+    return;
+  }
   try {
     // Check if the rate is cached in Redis
     const cachedRate = await redisClient.get(`exchangeRate_${currency}`);

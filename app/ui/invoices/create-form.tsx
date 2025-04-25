@@ -58,6 +58,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ currencies }) => {
 };
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
+
   const initialState: State = { message: null, errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
 

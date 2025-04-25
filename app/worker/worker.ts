@@ -2,15 +2,17 @@ import { generateVerificationCode } from '../lib/auth';
 import { sendVerificationEmail } from '../lib/email';
 import { Redis } from '@upstash/redis';
 
-if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-  console.error('Missing required environment variables for Upstash Redis.');
-  process.exit(1);
-}
+let redis: Redis | undefined;
 
+if (process.env.SKIP_REDIS_CONNECTION !== 'true') {
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+}) } else {
+  
+    console.log("Skipping Redis client initialization during build.");
+   
+}
 
 // Configuration
 const CONFIG = {
@@ -66,6 +68,11 @@ async function processEmail(email: string): Promise<void> {
       
       const { code } = await generateVerificationCode(email);
       await sendVerificationEmail(email, code);
+
+      if (!redis) {
+        console.error("Redis client not initialized. Cannot process email queue operations.");
+        return; // Exit the function if redis is undefined
+      }
       
       // Remove the email from the processing queue on success
       await redis.lrem('processing-queue', 1, email);
@@ -74,8 +81,12 @@ async function processEmail(email: string): Promise<void> {
       console.error(`Attempt ${attempt} failed for ${email}:`, error);
       
       if (attempt === CONFIG.RETRY_LIMIT) {
-        await redis.lpush('dead-letter-queue', email);
-        await redis.lrem('processing-queue', 1, email);
+        if (redis) {
+          await redis.lpush('dead-letter-queue', email);
+          await redis.lrem('processing-queue', 1, email);
+       } else {
+          console.error("Redis client not available, cannot move email to dead-letter queue.");
+       }
         console.error(`Permanent failure for ${email}`);
       } else {
         // Exponential backoff delay
@@ -88,6 +99,10 @@ async function processEmail(email: string): Promise<void> {
 }
 
 async function processBatch(): Promise<void> {
+  if (!redis) {
+    console.error("Redis client not initialized. Cannot process batch.");
+    return; // Exit the function if redis is undefined
+  }
   const emails: string[] = [];
 
   // Atomically move up to BATCH_SIZE emails from email-queue to processing-queue.
@@ -108,12 +123,17 @@ async function processBatch(): Promise<void> {
 
 async function runWorker(signal: AbortSignal): Promise<void> {
   console.log('Worker started with PID:', process.pid);
+
+  if (!redis && process.env.SKIP_REDIS_CONNECTION !== 'true') {
+    console.error("Fatal: Redis client not initialized at runtime. Worker cannot start.");
+    process.exit(1); 
+    return; 
+ }
   
   const processingLoop = async () => {
     while (!signal.aborted) {
       try {
         await processBatch();
-        // If no email was processed, wait a bit before trying again.
         await new Promise(resolve => setTimeout(resolve, CONFIG.EMPTY_QUEUE_DELAY));
       } catch (error) {
         console.error('Worker processing error:', error);

@@ -41,6 +41,7 @@ export type State = {
 
 
 export async function createInvoice(prevState: State, formData: FormData) {
+ 
   let usdAmount: number = 0;
   const session = await getServerSession(authOptions);
   const validatedFields = CreateInvoice.safeParse({
@@ -62,7 +63,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
     
     try {
       // Check if the rate is cached in Redis
-      const cachedRate = await redisClient.get(`exchangeRate_${currency}`);
+      const cachedRate = await redisClient!.get(`exchangeRate_${currency}`);
       
   
       if (cachedRate) {
@@ -73,7 +74,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
         usdAmount = await convertToUSD(amount, currency);
   
         // Cache the rate in Redis (expire after 1 hour)
-        await redisClient.set(`exchangeRate_${currency}`, usdAmount / amount, {
+        await redisClient!.set(`exchangeRate_${currency}`, usdAmount / amount, {
           EX: 3600, // 1 hour expiration
         });
       }
@@ -108,6 +109,10 @@ export async function createInvoice(prevState: State, formData: FormData) {
 
 
 export async function updateInvoice(id: string, formData: FormData) {
+  if(!redisClient){
+    console.log('redis not yet configured');
+    return;
+  }
   const session = await getServerSession(authOptions);
   let usdAmount: number = 0;
   // Parse and validate the form data

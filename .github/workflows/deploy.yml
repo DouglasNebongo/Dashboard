@@ -50,6 +50,7 @@ jobs:
             UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
             UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
             NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
+            SKIP_REDIS_CONNECTION=true
 
       - name: SSH to Droplet & Deploy
         uses: appleboy/ssh-action@v1
