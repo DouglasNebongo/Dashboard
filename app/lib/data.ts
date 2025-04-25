@@ -12,6 +12,18 @@ export interface FormattedInvoice {
   imageUrl: string;
 }
 
+interface RawFilteredInvoice {
+  id: number;
+  amount: number;
+  dateCreated: Date;
+  status: 'paid' | 'pending';
+  customer: {
+    name: string;
+    email: string;
+    imageUrl: string | null;
+  };
+}
+
 export interface FilteredInvoice {
   id: number;
   amount: number;
@@ -212,7 +224,7 @@ export async function fetchFilteredInvoices(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const invoices = await prisma.customerInvoice.findMany({
+    const invoices: RawFilteredInvoice[] = await prisma.customerInvoice.findMany({
       where: {
         userId: createdById,
         OR: [
