@@ -61,7 +61,7 @@ ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
 
-RUN npx tsc --project tsconfig.worker.json
+RUN npx tsc --project worker/tsconfig.worker.json
 RUN npm run build
 
 FROM node:22-alpine3.18 AS runner
