@@ -39,7 +39,7 @@ export default async function CustomersPage() {
     return (
       <CustomerPageClient
         initialData={{
-          data: customers.map(customer => ({
+          data: customers.map((customer: { id: string; name: string; email: string; phone: string | null; createdAt: Date }) => ({
             ...customer,
             phone: customer.phone ?? undefined,
           })),
