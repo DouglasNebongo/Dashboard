@@ -2,20 +2,21 @@ import { formatCurrency } from '@/app/lib/utils';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
+import { InvoiceStatus } from '@prisma/client';
+
 const ITEMS_PER_PAGE = 6;
 
-//helper function to get authenticated user ID
-
+// Helper function to get authenticated user ID
 async function getAuthenticatedUserId() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  if(!userId){
+  if (!userId) {
     throw new Error("Error: User not authenticated");
   }
   return userId;
 }
 
-//fetch filtered customers function
+// Fetch filtered customers function
 export async function fetchFilteredCustomers(query: string) {
   const createdById = await getAuthenticatedUserId();
   try {
@@ -23,8 +24,8 @@ export async function fetchFilteredCustomers(query: string) {
       where: {
         createdById,
         OR: [
-          { name: { contains: query, mode: 'insensitive'}},
-          { email: { contains: query, mode: 'insensitive' }},
+          { name: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } },
         ],
       },
       select: {
@@ -32,19 +33,26 @@ export async function fetchFilteredCustomers(query: string) {
         name: true,
         email: true,
         invoices: {
-          select:{
+          select: {
             id: true,
             status: true,
             amount: true,
           },
         },
       },
-      orderBy: {
-        name: 'asc',  
-      },
+      orderBy: { name: 'asc' },
     });
 
-    return customers.map((customer) => ({
+    return customers.map((customer: {
+      id: string;
+      name: string;
+      email: string;
+      invoices: Array<{
+        id: number;
+        status: InvoiceStatus;
+        amount: number;
+      }>;
+    }) => ({
       ...customer,
       total_invoices: customer.invoices.length,
       total_pendiing: formatCurrency(
@@ -58,14 +66,14 @@ export async function fetchFilteredCustomers(query: string) {
           .reduce((sum, f) => sum + f.amount, 0)
       ),
     }));
-  }catch(error) {
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch clients');
   }
 }
 
-//fetch all customers function
-export async function fetchCustomers(){
+// Fetch all customers function
+export async function fetchCustomers() {
   const createdById = await getAuthenticatedUserId();
 
   try {
@@ -81,20 +89,19 @@ export async function fetchCustomers(){
         name: 'asc',
       },
     });
-  }catch(error) {
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch clients');
   }
 }
 
-//function to fetch a particular invoice using the id
-
+// Function to fetch a particular invoice using the id
 export async function fetchInvoiceById(id: string) {
   const createdById = await getAuthenticatedUserId();
 
   try {
     const invoiceId = parseInt(id, 10);
-    if(isNaN(invoiceId)) {
+    if (isNaN(invoiceId)) {
       throw new Error('Invalid invoice ID');
     }
 
@@ -112,13 +119,11 @@ export async function fetchInvoiceById(id: string) {
     });
 
     return invoice ? { ...invoice, amount: invoice.amount / 100 } : null;
-   }catch (error) {
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
-   }
-
+  }
 }
-
 
 export async function fetchInvoicesPages(query: string) {
   const createdById = await getAuthenticatedUserId();
@@ -135,7 +140,7 @@ export async function fetchInvoicesPages(query: string) {
     });
 
     return Math.ceil(totalCount / ITEMS_PER_PAGE);
-  }catch (error) {
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of invoices');
   }
@@ -146,21 +151,27 @@ export async function fetchCardData() {
 
   try {
     const [invoiceCount, customerCount, paidInvoices, pendingInvoices] = await Promise.all([
-      prisma.customerInvoice.count({ where: { userId: createdById, } }),
-      prisma.customer.count({ where: { createdById, } }),
-      prisma.customerInvoice.aggregate({ _sum: { amount: true }, where: { userId: createdById, status: 'paid' } }),
-      prisma.customerInvoice.aggregate({ _sum: { amount: true }, where: { userId: createdById, status: 'pending' } }  ),
+      prisma.customerInvoice.count({ where: { userId: createdById } }),
+      prisma.customer.count({ where: { createdById } }),
+      prisma.customerInvoice.aggregate({
+        _sum: { amount: true },
+        where: { userId: createdById, status: 'paid' }
+      }),
+      prisma.customerInvoice.aggregate({
+        _sum: { amount: true },
+        where: { userId: createdById, status: 'pending' }
+      }),
     ]);
 
-  return {
-    numberOfCustomers: customerCount,
-    numberOfInvoices: invoiceCount,
-    totalPaidInvoices: formatCurrency(Number(paidInvoices._sum.amount ?? '0')),
-    totalPendingInvoices: formatCurrency(Number(pendingInvoices._sum.amount ?? '0')),
-  };
-  }catch (error) {
+    return {
+      numberOfCustomers: customerCount,
+      numberOfInvoices: invoiceCount,
+      totalPaidInvoices: formatCurrency(Number(paidInvoices._sum.amount ?? '0')),
+      totalPendingInvoices: formatCurrency(Number(pendingInvoices._sum.amount ?? '0')),
+    };
+  } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch card data');     
+    throw new Error('Failed to fetch card data');
   }
 }
 
@@ -168,37 +179,38 @@ export async function fetchLatestInvoices() {
   const createdById = await getAuthenticatedUserId();
   try {
     const latestInvoices = await prisma.customerInvoice.findMany({
-    where: {
-      userId: createdById,
-    },
-    select: {
-      id: true,
-      amount: true,
-      dateCreated: true,
-      customer: {
-        select: {
-          name: true, imageUrl: true, email: true,
+      where: {
+        userId: createdById,
+      },
+      select: {
+        id: true,
+        amount: true,
+        dateCreated: true,
+        customer: {
+          select: {
+            name: true,
+            imageUrl: true,
+            email: true,
+          }
         }
-      }
-    },
-    orderBy: {
-      dateCreated: 'desc',
-    },
-    take: 5,  
-  });
+      },
+      orderBy: {
+        dateCreated: 'desc',
+      },
+      take: 5,
+    });
 
     return latestInvoices.map(invoice => ({
       id: invoice.id,
       amount: formatCurrency(invoice.amount),
       name: invoice.customer.name,
       email: invoice.customer.email,
-      imageUrl: invoice.customer.imageUrl,
+      imageUrl: invoice.customer.imageUrl as string, // Type assertion
     }));
-
-   }catch (error) {
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch latest invoices');
-    }
+  }
 }
 
 export async function fetchRevenue() {
@@ -214,26 +226,27 @@ export async function fetchRevenue() {
         dateCreated: true,
       },
       orderBy: {
-        dateCreated: 'asc',   
+        dateCreated: 'asc',
       }
     });
-     const monthlyRevenue = transactions.reduce((acc, { dateCreated, amount }) =>
-       { 
-          const monthYear = dateCreated.toLocaleString('default', { month: 'short', year: 'numeric' });
-          acc[monthYear] = (acc[monthYear] || 0) + amount;
-          return acc;
-       }, {} as Record<string, number>);
 
-       return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-          month, revenue }));
-  }catch (error) {
+    const monthlyRevenue = transactions.reduce((acc, { dateCreated, amount }) => {
+      const monthYear = dateCreated.toLocaleString('default', { month: 'short', year: 'numeric' });
+      acc[monthYear] = (acc[monthYear] || 0) + amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+      month,
+      revenue: revenue  
+    }));
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch revenue data');
   }
 }
 
-//fetch filtered invoices 
-
+// Fetch filtered invoices 
 export async function fetchFilteredInvoices(query: string, currentPage: number) {
   const createdById = await getAuthenticatedUserId();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -246,10 +259,23 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
           { customer: { name: { contains: query, mode: 'insensitive' } } },
           { customer: { email: { contains: query, mode: 'insensitive' } } },
           { amount: { equals: parseFloat(query) || undefined } },
-          ...(!isNaN(new Date(query).getTime()) ? [{ dateCreated: { gte: new Date(query), lte: new Date(query) } }] : []),
+          ...(!isNaN(new Date(query).getTime()) ? [{
+            dateCreated: {
+              gte: new Date(query),
+              lte: new Date(query)
+            }
+          }] : []),
         ],
       },
-      include: { customer: { select: { name: true, email: true, imageUrl: true } } },
+      include: {
+        customer: {
+          select: {
+            name: true,
+            email: true,
+            imageUrl: true
+          }
+        }
+      },
       orderBy: { dateCreated: 'desc' },
       skip: offset,
       take: ITEMS_PER_PAGE,
@@ -262,7 +288,7 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
       status: invoice.status,
       name: invoice.customer.name,
       email: invoice.customer.email,
-      image_url: invoice.customer.imageUrl,
+      image_url: invoice.customer.imageUrl as string, // Type assertion
     }));
   } catch (error) {
     console.error('Database Error:', error);
