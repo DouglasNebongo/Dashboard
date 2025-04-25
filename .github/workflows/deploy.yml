@@ -80,6 +80,7 @@ jobs:
             UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
             UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
             NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
+            POSTGRES_URL=${{ secrets.POSTGRES_URL }}
             EOF
 
             echo "Stopping old container (if any)…"
