@@ -4,37 +4,35 @@ FROM node:20-alpine3.18 AS builder
 # Set working directory
 WORKDIR /app
 
-# Install only prod deps, reproducibly
-COPY package.json package-lock.json ./
+# Install dependencies
+COPY package*.json ./
 ENV NODE_ENV=production
 RUN npm ci
 
-# Copy source
+# Copy source and build the Next.js app
 COPY . .
-
-# (Optional) If you have a build step, e.g. for TypeScript or bundlers:
-# RUN npm run build
+RUN npm run build
 
 # 2) Runner stage
 FROM node:20-alpine3.18 AS runner
 
 # Create app directory
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy only what's needed from builder
+# Copy only what's needed from the builder
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app ./
-
-# Switch to a non-root user
-USER node
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./
 
 # Expose your app port
 EXPOSE 3000
 
-# Metadata labels (optional but recommended)
-LABEL org.opencontainers.image.source="https://github.com/your/repo"
-LABEL org.opencontainers.image.license="MIT"
+# Switch to a non-root user for security
+USER node
 
-# Launch
-CMD ["node", "server.js"]
+# Start the Next.js server
+CMD ["npm", "run", "start"]
 
