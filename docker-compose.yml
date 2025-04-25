@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    command: node /app/dist/worker.js 
+    command: node /app/dist/worker/worker.js
 
 volumes:
   postgres_data:

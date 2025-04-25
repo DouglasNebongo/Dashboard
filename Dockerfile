@@ -36,18 +36,16 @@ RUN npm cache clean --force
 RUN npm install
 RUN npm install --save-dev --force @types/bcrypt @types/nodemailer
 
-RUN ls -laR /app/node_modules/@types/
+
 
 # Generate the Prisma client into node_modules/
 RUN npx prisma generate
 
-RUN ls -l /app
+
 # Copy source and build the Next.js app
 COPY . .
 
-RUN ls -l /app
 
-RUN ls -l /app/app
 
 ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
@@ -70,19 +68,10 @@ ENV UPSTASH_REDIS_PORT=$UPSTASH_REDIS_PORT
 ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
-RUN ls -l /app/app/worker
+
 RUN npx tsc --project app/worker/tsconfig.worker.json
 
-# --- DEBUG STEP: List contents after worker compilation ---
-# List contents of where we EXPECTED the output (relative to tsconfig and rootDir .)
-RUN ls -l /app/app/worker/dist # This is the one that failed
-# List contents of /app/app/worker/ to see if anything *was* created directly there
-RUN ls -l /app/app/worker/
-# List contents of the main /app directory (just in case 'dist' was created at root)
-RUN ls -l /app/
-# List contents of /app/dist (if outDir was relative to WORKDIR /app)
-RUN ls -l /app/dist
-# --- End DEBUG STEP ---
+
 RUN npm run build
 
 FROM node:22-alpine3.18 AS runner
