@@ -130,7 +130,7 @@ jobs:
             
               # --- MANUAL WAIT LOOP FOR DB HEALTH ---
             echo "Waiting for database service to be healthy using manual check..."
-            HEALTH_CHECK_TIMEOUT=120 # Total time to wait in seconds (e.g., 2 minutes)
+            HEALTH_CHECK_TIMEOUT=300 # Total time to wait in seconds (e.g., 2 minutes)
             WAIT_INTERVAL=5 # How often to check the status in seconds
             ELAPSED_TIME=0
             DB_STATUS=""
