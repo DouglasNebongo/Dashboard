@@ -128,36 +128,43 @@ jobs:
             # Wait for the db service to reach the 'healthy' state before proceeding
             # This command requires docker compose version 1.27.0+ or docker compose plugin
             
-              # --- MANUAL WAIT LOOP FOR DB HEALTH ---
+            
+            # --- MANUAL WAIT LOOP FOR DB HEALTH (checking full status with grep) ---
             echo "Waiting for database service to be healthy using manual check..."
-            HEALTH_CHECK_TIMEOUT=300 # Total time to wait in seconds (e.g., 2 minutes)
-            WAIT_INTERVAL=5 # How often to check the status in seconds
+            HEALTH_CHECK_TIMEOUT=300 # seconds
+            WAIT_INTERVAL=5 # seconds
             ELAPSED_TIME=0
-            DB_STATUS=""
+            # No need for DB_STATUS variable here, will check grep output directly
 
-            while [ "$DB_STATUS" != "healthy" ] && [ $ELAPSED_TIME -lt $HEALTH_CHECK_TIMEOUT ]; do
-              # Get the service state (healthy, starting, running, exited, etc.)
-              # Redirect stderr to /dev/null in case the service isn't listed initially
-              DB_STATUS=$(docker compose ps db --format "{{.State}}" 2>/dev/null || echo "not_running")
+            while [ $ELAPSED_TIME -lt $HEALTH_CHECK_TIMEOUT ]; do
+              echo "Checking DB service health status (Elapsed: ${ELAPSED_TIME}s)..."
 
-              if [ "$DB_STATUS" = "healthy" ]; then
+              # Get the full service status line for 'db'
+              # Grep for '(healthy)' and check if grep finds it
+              if docker compose ps db 2>/dev/null | grep -q "(healthy)"; then
                 echo "Database service is healthy."
-                break # Exit the loop
-              elif [ "$DB_STATUS" = "running" ] || [ "$DB_STATUS" = "starting" ]; then
-                echo "Database service is still starting or running (${DB_STATUS}). Waiting ${WAIT_INTERVAL}s..."
-              elif [ "$DB_STATUS" = "not_running" ] || [ "$DB_STATUS" = "exited" ]; then
-                 echo "Database service is not running or exited (${DB_STATUS}). Aborting."
-                 exit 1 # Exit script with error
+                break # Exit the loop if '(healthy)' is found
+              # Check for other states if not healthy to provide better logs/fail conditions
+              elif docker compose ps db 2>/dev/null | grep -q " Exited "; then
+                 echo "Database service is not running (Exited). Aborting."
+                 exit 1 # Exit script with error if it exited
+              elif docker compose ps db 2>/dev/null | grep -q " Starting "; then
+                 echo "Database service is still starting. Waiting ${WAIT_INTERVAL}s..."
+              elif docker compose ps db 2>/dev/null | grep -q " running "; then # Look for ' running ' (with spaces) to avoid matching substrings
+                 echo "Database service is running but not yet healthy. Waiting ${WAIT_INTERVAL}s..."
               else
-                echo "Unknown database service state: ${DB_STATUS}. Waiting ${WAIT_INTERVAL}s..."
+                # If the status is something else or not yet listed
+                echo "Database service status not yet 'healthy'. Current state unknown. Waiting ${WAIT_INTERVAL}s..."
               fi
+
 
               sleep $WAIT_INTERVAL
               ELAPSED_TIME=$((ELAPSED_TIME + WAIT_INTERVAL))
             done
 
             # Check if the loop finished because of a timeout
-            if [ "$DB_STATUS" != "healthy" ]; then
+            # Check the health status one last time
+            if ! docker compose ps db 2>/dev/null | grep -q "(healthy)"; then
               echo "Database service did not become healthy within ${HEALTH_CHECK_TIMEOUT} seconds. Aborting."
               exit 1 # Exit script with error
             fi
