@@ -11,6 +11,16 @@ export interface FormattedInvoice {
   imageUrl: string;
 }
 
+interface InvoiceWithCustomer {
+  id: number;
+  amount: number;
+  customer: {
+    name: string;
+    email: string;
+    imageUrl: string | null;
+  };
+}
+
 const ITEMS_PER_PAGE = 6;
 
 // Helper function to get authenticated user ID
@@ -293,24 +303,28 @@ export async function fetchRevenue() {
 // Fetch latest invoices with explicit typing
 export async function fetchLatestInvoices(): Promise<FormattedInvoice[]> {
   const createdById = await getAuthenticatedUserId();
+
   try {
-    const latestInvoices = await prisma.customerInvoice.findMany({
+    
+    const latestInvoices: InvoiceWithCustomer[] = await prisma.customerInvoice.findMany({
       where: { userId: createdById },
       select: {
         id: true,
         amount: true,
-        customer: { select: { name: true, email: true, imageUrl: true } },
+        customer: {
+          select: { name: true, email: true, imageUrl: true }
+        },
       },
       orderBy: { dateCreated: 'desc' },
       take: 5,
     });
 
-    return latestInvoices.map((invoice) => ({
+    return latestInvoices.map(invoice => ({
       id: invoice.id,
-      amount: formatCurrency(invoice.amount), // Converts amount to a string
+      amount: formatCurrency(invoice.amount),
       name: invoice.customer.name,
       email: invoice.customer.email,
-      imageUrl: invoice.customer.imageUrl as string,
+      imageUrl: invoice.customer.imageUrl ?? '',  
     }));
   } catch (error) {
     console.error('Database Error:', error);
