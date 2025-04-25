@@ -8,12 +8,22 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: fermatd/dashboard
-      CONTAINER_NAME: dashboard-container
-      REMOTE_PATH: /dashboard
+      CONTAINER_NAME: dashboard-container # Note: With docker compose, the container name will be different, e.g., dashboard-app-1
+      REMOTE_PATH: /dashboard # The target directory on the droplet
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # --- Add this step to transfer docker-compose.yml ---
+      - name: Copy docker-compose.yml to Droplet
+        uses: appleboy/scp-action@v0.1.4 # Use the SCP action
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml" # The path to your docker-compose.yml in your GitHub repo
+          target: "${{ env.REMOTE_PATH }}/" # The target directory on the droplet (/dashboard/)
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -32,25 +42,25 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest
           build-args: |
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
-            EMAIL_SERVER_HOST=${{ secrets.EMAIL_SERVER_HOST }}
-            EMAIL_SERVER_PORT=${{ secrets.EMAIL_SERVER_PORT }}
-            EMAIL_SERVER_USER=${{ secrets.EMAIL_SERVER_USER }}
-            EMAIL_SERVER_PASSWORD=${{ secrets.EMAIL_SERVER_PASSWORD }}
-            EMAIL_FROM=${{ secrets.EMAIL_FROM }}
-            UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}
-            UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
-            UPSTASH_REDIS_HOST=${{ secrets.UPSTASH_REDIS_HOST }}
-            UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
-            UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
-            NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
-            SKIP_REDIS_CONNECTION=true
+              # ... your existing build args here, including all the ones we added previously ...
+              GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+              GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+              UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}
+              UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+              NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+              NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+              POSTGRES_URL=${{ secrets.POSTGRES_URL }}
+              SKIP_REDIS_CONNECTION=true
+              EMAIL_SERVER_HOST=${{ secrets.EMAIL_SERVER_HOST }}
+              EMAIL_SERVER_PORT=${{ secrets.EMAIL_SERVER_PORT }}
+              EMAIL_SERVER_USER=${{ secrets.EMAIL_SERVER_USER }}
+              EMAIL_SERVER_PASSWORD=${{ secrets.EMAIL_SERVER_PASSWORD }}
+              EMAIL_FROM=${{ secrets.EMAIL_FROM }}
+              UPSTASH_REDIS_HOST=${{ secrets.UPSTASH_REDIS_HOST }}
+              UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
+              UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
+              NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
+
 
       - name: SSH to Droplet & Deploy
         uses: appleboy/ssh-action@v1
@@ -58,20 +68,30 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # --- Modify the script to use docker compose ---
           script: |
             set -euo pipefail
 
+            # Change directory to where docker-compose.yml and .env are located
+            cd ${{ env.REMOTE_PATH }} # This is /dashboard/
+
             echo "Writing .env file…"
-            cat > "${{ env.REMOTE_PATH }}/.env" <<'EOF'
+            # Write the .env file content directly in the /dashboard/ directory
+            cat > .env <<'EOF'
+            # --- Your .env content goes here ---
+            # Ensure DATABASE_URL and POSTGRES_URL point to 'db'
+            # Ensure POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB are present for db service
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} # Keep if your app uses this alias
             POSTGRES_USER=postgres
             POSTGRES_DB=myprismadb
             DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
+            POSTGRES_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
+
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} # Ensure secret has a valid URL value
             EMAIL_SERVER_HOST=${{ secrets.EMAIL_SERVER_HOST }}
             EMAIL_SERVER_PORT=${{ secrets.EMAIL_SERVER_PORT }}
             EMAIL_SERVER_USER=${{ secrets.EMAIL_SERVER_USER }}
@@ -83,21 +103,30 @@ jobs:
             UPSTASH_REDIS_PORT=${{ secrets.UPSTASH_REDIS_PORT }}
             UPSTASH_REDIS_PASSWORD=${{ secrets.UPSTASH_REDIS_PASSWORD }}
             NEXT_PUBLIC_EXCHANGE_RATE_API_KEY=${{ secrets.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY }}
-            POSTGRES_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@db:5432/myprismadb?schema=public
-            EOF
+            EOF # End of .env content
 
-            echo "Stopping old container (if any)…"
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm ${{ env.CONTAINER_NAME }} || true
 
-            echo "Pulling new image…"
-            docker pull ${{ env.IMAGE_NAME }}:latest
+            echo "Stopping and removing old Docker Compose services…"
+            # Use docker compose to stop and remove services
+            # Use -f to specify the compose file if not in the current dir (though cd takes care of this)
+            # Use --timeout 30 (or similar) if graceful shutdown takes time
+            docker compose down --remove-orphans -v # -v also removes volumes defined in compose file (like postgres_data)
 
-            echo "Starting container with .env…"
-            docker run -d \
-              --name ${{ env.CONTAINER_NAME }} \
-              --env-file "${{ env.REMOTE_PATH }}/.env" \
-              -p 3000:3000 \
-              ${{ env.IMAGE_NAME }}:latest
+            echo "Pulling the latest Docker image for the app service…"
+            # Pull the image defined in the docker-compose.yml for the 'app' service
+            docker compose pull app
 
-              
+
+            echo "Starting services using Docker Compose…"
+            # Start services defined in docker-compose.yml in detached mode
+            # --build if you want to build on the droplet (generally not recommended)
+            # --force-recreate if you want to force recreation even if config hasn't changed
+            docker compose up -d
+            # The depends_on and healthcheck in the compose file will handle the app waiting for the db
+
+            # Remove the old docker run command
+            # docker run -d \
+            #   --name ${{ env.CONTAINER_NAME }} \
+            #   --env-file .env \ # env_file is now in docker-compose.yml
+            #   -p 3000:3000 \
+            #   ${{ env.IMAGE_NAME }}:latest
