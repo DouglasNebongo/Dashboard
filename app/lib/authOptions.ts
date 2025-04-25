@@ -30,8 +30,8 @@ const createCustomPrismaAdapter = () => {
 
 const getGoogleCredentials = () => {
   
-  const clientId = process.env.GOOGLE_CLIENT_ID || '';
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
     throw new Error('Google OAuth environment variables not configured');
@@ -39,6 +39,8 @@ const getGoogleCredentials = () => {
 
   return { clientId, clientSecret };
 };
+
+
 
 const authorizeCredentials = async (credentials?: Record<string, string>) => {
   if (!credentials) return null;

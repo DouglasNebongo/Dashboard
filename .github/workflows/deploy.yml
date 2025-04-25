@@ -31,6 +31,9 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest
+          build-args: |
+             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
 
       - name: SSH to Droplet & Deploy
         uses: appleboy/ssh-action@v1
