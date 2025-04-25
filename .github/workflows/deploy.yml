@@ -15,6 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug list repository contents
+        run: |
+          echo "Listing contents of the repository checkout directory (${{ github.workspace }}):"
+          ls -alF ${{ github.workspace }} # List all files, including hidden ones, with types, in the workspace
+
       # --- Add this step to transfer docker-compose.yml ---
       - name: Copy docker-compose.yml to Droplet
         uses: appleboy/scp-action@v0.1.4 # Use the SCP action
