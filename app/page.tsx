@@ -38,7 +38,7 @@ export default function Page() {
             Streamline your work and grow your business with ease.
           </p>
           <p className="text-lg md:text-2xl text-white text-center max-w-md">
-            Ledger is designed to help you manage clients, track invoices, and analyze earnings—all in one place.
+            Ledger is designed to help you manage clients, track invoices, and analyze earnings. All in one place.
           </p>
         </div>
 
