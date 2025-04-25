@@ -125,7 +125,7 @@ async function runWorker(signal: AbortSignal): Promise<void> {
   console.log('Worker started with PID:', process.pid);
 
   if (!redis && process.env.SKIP_REDIS_CONNECTION !== 'true') {
-    console.error("Fatal: Redis client not initialized at runtime. Worker cannot start now. Please try later!.");
+    console.error("Fatal: Redis client not initialized at runtime. Worker cannot start now. Please try later!..");
     process.exit(1); 
     return; 
  }
