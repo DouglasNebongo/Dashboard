@@ -9,7 +9,10 @@
       "typeRoots": ["../../node_modules/@types"],
       "types": ["bcrypt", "nodemailer"]
     },
-    "include": ["worker.ts"] // Include only the worker file
+    "include": [
+      "worker.ts", 
+      "declarations.d.ts"] // Include only the worker file
+   
   }
 
 
