@@ -18,11 +18,7 @@ RUN npx prisma generate
 COPY . .
 # RUN npm run build
 
-RUN --mount=type=secret,id=env \
-    set -a && \
-    . /run/secrets/env && \
-    set +a && \
-    npm run build
+RUN npm run build
 
 # 2) Runner stage
 FROM node:22-alpine3.18 AS runner
