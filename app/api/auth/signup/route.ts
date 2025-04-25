@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     },
   });
 
-  //await sendVerificationEmail(newUser.email!);
+  
 
   return NextResponse.json(
     { message: "User created successfully. Please verify your email." },

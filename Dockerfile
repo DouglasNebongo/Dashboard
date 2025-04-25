@@ -9,6 +9,8 @@ COPY package*.json ./
 ENV NODE_ENV=production
 RUN npm ci
 
+# Generate the Prisma client into node_modules/
+RUN npx prisma generate
 # Copy source and build the Next.js app
 COPY . .
 RUN npm run build
