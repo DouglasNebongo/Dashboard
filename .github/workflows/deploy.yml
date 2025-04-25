@@ -123,10 +123,16 @@ jobs:
             # --force-recreate if you want to force recreation even if config hasn't changed
             docker compose up -d
             # The depends_on and healthcheck in the compose file will handle the app waiting for the db
+            
+            echo "Waiting for database service to be healthy..."
+            # Wait for the db service to reach the 'healthy' state before proceeding
+            # This command requires docker compose version 1.27.0+ or docker compose plugin
+            docker compose wait db --timeout 60 # Wait up to 60 seconds
 
-            # Remove the old docker run command
-            # docker run -d \
-            #   --name ${{ env.CONTAINER_NAME }} \
-            #   --env-file .env \ # env_file is now in docker-compose.yml
-            #   -p 3000:3000 \
-            #   ${{ env.IMAGE_NAME }}:latest
+            echo "Running Prisma migrations..."
+            # Execute the migrate deploy command inside the running app container
+            # 'app' is the service name in docker-compose.yml
+            # This command needs to find the prisma directory and node_modules inside the container
+            docker compose exec app npx prisma migrate deploy
+
+            echo "Deployment complete."
