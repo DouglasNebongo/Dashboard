@@ -12,6 +12,16 @@ export interface FormattedInvoice {
   imageUrl: string;
 }
 
+export interface FilteredInvoice {
+  id: number;
+  amount: number;
+  date: Date;
+  status: 'paid' | 'pending';
+  name: string;
+  email: string;
+  image_url: string;
+  }
+
 interface InvoiceWithCustomer {
   id: number;
   amount: number;
@@ -196,7 +206,8 @@ export async function fetchCardData() {
 
 
 // Fetch filtered invoices 
-export async function fetchFilteredInvoices(query: string, currentPage: number) {
+export async function fetchFilteredInvoices( 
+  query: string, currentPage: number): Promise<FilteredInvoice[]> { 
   const createdById = await getAuthenticatedUserId();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -230,17 +241,7 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
       take: ITEMS_PER_PAGE,
     });
 
-    return invoices.map((invoice: {
-      id: number;
-      amount: number;
-      dateCreated: Date;
-      status: 'paid' | 'pending';
-      customer: {
-        name: string;
-        email: string;
-        imageUrl: string | null;
-      };
-    }) => ({
+    return invoices.map((invoice) => ({
       id: invoice.id,
       amount: invoice.amount,
       date: invoice.dateCreated,
