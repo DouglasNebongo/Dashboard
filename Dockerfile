@@ -39,7 +39,6 @@ RUN npx prisma generate
 # Copy source and build the Next.js app
 COPY . .
 
-# Make build arguments available as environment variables for the build command (npm run build)
 ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 ENV UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL 
@@ -62,11 +61,9 @@ ENV POSTGRES_URL=$POSTGRES_URL
 ENV SKIP_REDIS_CONNECTION=$SKIP_REDIS_CONNECTION
 
 
-
+RUN npx tsc --project tsconfig.worker.json
 RUN npm run build
 
-# 2) Runner stage
-# ... (rest of your runner stage remains the same)
 FROM node:22-alpine3.18 AS runner
 
 # Create app directory
@@ -80,6 +77,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/dist ./dist
 
 # Expose your app port
 EXPOSE 3000

@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   app:
-    image: fermatd/dashboard:latest    # or build: . if you really want to rebuild on the Droplet
+    image: fermatd/dashboard:latest    
     ports:
       - "3000:3000"
     env_file:
-      - .env                             # <— load `/dashboard/.env`
+      - .env                             
     depends_on:
       db:
         condition: service_healthy
@@ -23,6 +23,16 @@ services:
       interval: 10s
       retries: 5
     restart: unless-stopped
+
+  worker: 
+    image: fermatd/dashboard:latest 
+    env_file:
+      - .env 
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: node /app/dist/worker.js 
 
 volumes:
   postgres_data:
