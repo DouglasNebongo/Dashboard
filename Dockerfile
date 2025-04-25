@@ -33,6 +33,7 @@ COPY prisma ./prisma
 ENV NODE_ENV=production
 RUN npm ci
 
+RUN ls -lR /app/node_modules/@types/
 # Generate the Prisma client into node_modules/
 RUN npx prisma generate
 
