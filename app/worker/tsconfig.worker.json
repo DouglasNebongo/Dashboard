@@ -5,9 +5,7 @@
       "moduleResolution": "node", // Use Node.js module resolution
       "noEmit": false, // Allow emitting JavaScript files
       "outDir": "./dist",// Output directory for compiled files
-      "skipLibCheck": true,
-      "typeRoots": ["../../node_modules/@types"],
-      "types": ["bcrypt", "nodemailer"]
+     
     },
     "include": [
       "worker.ts", 
