@@ -200,12 +200,20 @@ export async function fetchLatestInvoices() {
       take: 5,
     });
 
-    return latestInvoices.map(invoice => ({
+    return latestInvoices.map((invoice: {
+      id: number;
+      amount: number;
+      customer: {
+        name: string;
+        email: string;
+        imageUrl: string | null;
+      };
+    }) => ({
       id: invoice.id,
       amount: formatCurrency(invoice.amount),
       name: invoice.customer.name,
       email: invoice.customer.email,
-      imageUrl: invoice.customer.imageUrl as string, // Type assertion
+      imageUrl: invoice.customer.imageUrl,
     }));
   } catch (error) {
     console.error('Database Error:', error);
