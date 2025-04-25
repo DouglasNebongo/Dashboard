@@ -2,7 +2,7 @@ import { formatCurrency } from '@/app/lib/utils';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
-import { InvoiceStatus } from '@prisma/client';
+
 
 const ITEMS_PER_PAGE = 6;
 
@@ -49,7 +49,7 @@ export async function fetchFilteredCustomers(query: string) {
       email: string;
       invoices: Array<{
         id: number;
-        status: InvoiceStatus;
+        status: 'pending' | 'paid';
         amount: number;
       }>;
     }) => ({
