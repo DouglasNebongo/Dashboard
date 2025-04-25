@@ -238,15 +238,21 @@ export async function fetchRevenue() {
       }
     });
 
-    const monthlyRevenue = transactions.reduce((acc, { dateCreated, amount }) => {
-      const monthYear = dateCreated.toLocaleString('default', { month: 'short', year: 'numeric' });
-      acc[monthYear] = (acc[monthYear] || 0) + amount;
-      return acc;
-    }, {} as Record<string, number>);
+    const monthlyRevenue = transactions.reduce(
+      (acc: Record<string, number>, { dateCreated, amount }) => {
+        const monthYear = dateCreated.toLocaleString('default', { 
+          month: 'short', 
+          year: 'numeric' 
+        });
+        acc[monthYear] = (acc[monthYear] || 0) + amount;
+        return acc;
+      }, 
+      {} as Record<string, number>
+    );
 
     return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
       month,
-      revenue: revenue  
+      revenue
     }));
   } catch (error) {
     console.error('Database Error:', error);
