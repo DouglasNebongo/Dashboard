@@ -3,6 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/authOptions';
 import { prisma } from '@/app/lib/prisma';
 
+export interface FormattedInvoice {
+  id: number;
+  amount: string;
+  name: string;
+  email: string;
+  imageUrl: string;
+}
 
 const ITEMS_PER_PAGE = 6;
 
@@ -284,48 +291,26 @@ export async function fetchRevenue() {
 }
 
 // Fetch latest invoices with explicit typing
-export async function fetchLatestInvoices() {
+export async function fetchLatestInvoices(): Promise<FormattedInvoice[]> {
   const createdById = await getAuthenticatedUserId();
   try {
     const latestInvoices = await prisma.customerInvoice.findMany({
-      where: {
-        userId: createdById,
-      },
+      where: { userId: createdById },
       select: {
         id: true,
         amount: true,
-        dateCreated: true,
-        customer: {
-          select: {
-            name: true,
-            imageUrl: true,
-            email: true,
-          }
-        }
+        customer: { select: { name: true, email: true, imageUrl: true } },
       },
-      orderBy: {
-        dateCreated: 'desc',
-      },
+      orderBy: { dateCreated: 'desc' },
       take: 5,
     });
 
-    // Add explicit invoice type
-    type InvoiceType = {
-      id: number;
-      amount: number;
-      customer: {
-        name: string;
-        email: string;
-        imageUrl: string | null;
-      };
-    };
-
-    return latestInvoices.map((invoice: InvoiceType) => ({
+    return latestInvoices.map((invoice) => ({
       id: invoice.id,
-      amount: formatCurrency(invoice.amount),
+      amount: formatCurrency(invoice.amount), // Converts amount to a string
       name: invoice.customer.name,
       email: invoice.customer.email,
-      imageUrl: invoice.customer.imageUrl as string, // Type assertion
+      imageUrl: invoice.customer.imageUrl as string,
     }));
   } catch (error) {
     console.error('Database Error:', error);
