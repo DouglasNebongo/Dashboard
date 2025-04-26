@@ -17,7 +17,7 @@ if (process.env.SKIP_REDIS_CONNECTION !== 'true') {
       },
     });
 
-    redisClient.on('error', (err) => console.error('Redis Client Error:', err));
+    redisClient.on('error', (err) => console.error('Redis Client Error :', err));
 
     (async () => {
       await redisClient.connect();
