@@ -1,10 +1,12 @@
 
 import { Redis } from '@upstash/redis';
+let redis: Redis | undefined;;
+
 
 import { createClient, type RedisClientType } from 'redis';
 
 let redisClient: RedisClientType | undefined;
-let redis: Redis | undefined;;
+
 
 if (process.env.SKIP_REDIS_CONNECTION !== 'true') {
   try {
