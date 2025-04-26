@@ -10,7 +10,7 @@ if (process.env.SKIP_REDIS_CONNECTION !== 'true') {
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 }); } else {
   
-    console.log("Skipping Redis client initialization during build....");
+    console.log("Skipping Redis client initialization during build.....");
    
 }
 
