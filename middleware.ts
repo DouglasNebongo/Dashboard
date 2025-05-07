@@ -6,7 +6,7 @@ const requestCounts = new Map<string, { count: number, timestamp: number }>();
 
 //rate limit config
 const RATE_LIMIT_WINDOW: number = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS: number = 20;
+const RATE_LIMIT_MAX_REQUESTS: number = 100;
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
