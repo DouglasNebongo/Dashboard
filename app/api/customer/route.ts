@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    const totalPages = Math.ceil(totalItems / pageSize);
+    const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
 
     return NextResponse.json({
       data: customers,
