@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   
 
   return NextResponse.json(
-    { message: "User created successfully. Please verify your email." },
+    { message: "User created successfully. Please verify your email!." },
     { status: 201 }
   );
 }
