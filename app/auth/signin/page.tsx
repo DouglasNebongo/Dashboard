@@ -95,7 +95,7 @@ function SignInForm() {
             type="email"
             id="email"
             {...register("email")}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             aria-invalid={!!errors.email}
           />
           {errors.email && (
@@ -111,7 +111,7 @@ function SignInForm() {
             type="password"
             id="password"
             {...register("password")}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             aria-invalid={!!errors.password}
           />
           {errors.password && (

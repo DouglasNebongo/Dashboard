@@ -20,7 +20,7 @@ export default function SignUp() {
       {/* google signup button */}
       <button
         onClick={() => signIn("google")}
-        className="w-full flex items-center justify-center text-gray-500 border border-gray-300 py-2 px-4 rounded-2xl shadow-md hover:bg-blue-400 hover:text-white transition-colors mb-4"
+        className="w-full flex items-center justify-center text-gray-500 border border-gray-300 py-2 px-4 rounded-sm shadow-md hover:bg-blue-400 hover:text-white transition-colors mb-4"
       >
         <FcGoogle className="w-6 h-6 mr-2" />
         <span className="text-lg text-white md:text-xl">Sign up with Google</span>
@@ -29,7 +29,7 @@ export default function SignUp() {
       {/* email sign up button */}
       <button
         onClick={handleEmailSignUp}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-2xl hover:bg-blue-700 transition duration-300 text-lg md:text-xl"
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-sm hover:bg-blue-700 transition duration-300 text-lg md:text-xl"
       >
         Sign up with Email
       </button>
