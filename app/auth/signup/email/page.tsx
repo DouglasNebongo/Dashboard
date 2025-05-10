@@ -111,6 +111,7 @@ export default function EmailSignUp() {
               type="text"
               id="fullName"
               name="fullName"
+              placeholder='Full Name'
               value={formData.fullName}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -129,6 +130,7 @@ export default function EmailSignUp() {
               type="email"
               id="email"
               name="email"
+              placeholder='Email'
               value={formData.email}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -147,6 +149,7 @@ export default function EmailSignUp() {
               type="password"
               id="password"
               name="password"
+              placeholder='Password'
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
