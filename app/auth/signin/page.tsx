@@ -30,7 +30,7 @@ export default function SignInPage() {
       </div>
       <div className="fixed inset-0 -z-10 bg-black/50 backdrop-blur-sm"></div>
       <div className={`${lusitana.className} min-h-screen flex items-center justify-center`}>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading....</div>}>
           <SignInForm />
         </Suspense>
       </div>
